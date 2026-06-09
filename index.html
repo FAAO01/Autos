@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoMarket Nicaragua - Marketplace de Autos</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="header-content">
+      <h1>🚗 AutoMarket Nicaragua</h1>
+      <div class="header-buttons">
+        <button id="loginBtn" class="btn-login" onclick="mostrarLogin()">
+          🔑 Iniciar Sesión
+        </button>
+        <button id="logoutBtn" class="btn-logout" style="display:none;" onclick="logout()">
+          🚪 Cerrar Sesión
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Nav -->
+  <nav class="navbar">
+    <ul class="nav-menu">
+      <li><a href="#" onclick="mostrarTodos()" class="nav-link">🚗 Todos</a></li>
+      <li><a href="#" onclick="filtrarCategoria('nuevos')" class="nav-link">✨ Nuevos</a></li>
+      <li><a href="#" onclick="filtrarCategoria('semi')" class="nav-link">🔄 Semi nuevos</a></li>
+      <li><a href="#" onclick="filtrarCategoria('descuento')" class="nav-link">💰 En descuentos</a></li>
+      <li><a href="#" onclick="filtrarCategoria('subasta')" class="nav-link">🔨 Subasta</a></li>
+    </ul>
+  </nav>
+
+  <!-- Modal de Login -->
+  <div id="loginModal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="cerrarLogin()">✕</button>
+      <h2>Administración</h2>
+      <p class="modal-subtitle">Inicia sesión para acceder</p>
+      <input type="text" id="username" placeholder="Usuario" required>
+      <input type="password" id="password" placeholder="Contraseña" required>
+      <select id="role">
+        <option value="">Seleccionar rol</option>
+        <option value="vendedor">💼 Vendedor</option>
+        <option value="admin">⚙️ Administrador</option>
+      </select>
+      <button class="btn btn-primary" onclick="login()">Entrar</button>
+      <p class="login-error" id="loginError" style="color: #ea4335; font-size: 13px; margin-top: 10px; display: none;"></p>
+    </div>
+  </div>
+
+  <main class="container">
+    <!-- Sistema -->
+    <div id="systemSection" style="display:none;">
+      <div class="welcome-banner">
+        <h2 id="welcome"></h2>
+      </div>
+
+      <!-- Banner Promocional -->
+      <div class="promo-banner">
+        <div class="promo-content">
+          <h3>🎉 ¡OFERTAS DISPONIBLES!</h3>
+          <div class="promo-discounts">
+            <span class="discount-item">Hasta 20% OFF</span>
+            <span class="discount-item">Hasta 25% OFF</span>
+            <span class="discount-item">Hasta 30% OFF</span>
+            <span class="discount-item">Hasta 40% OFF</span>
+          </div>
+          <p>¡No te pierdas nuestros mejores precios en descuentos!</p>
+        </div>
+      </div>
+
+      <!-- Buscador y Botones de Acción -->
+      <div class="search-section">
+        <div class="search-card">
+          <input type="text" id="searchInput" placeholder="🔍 Buscar por marca o modelo..." onkeyup="buscarAuto()">
+        </div>
+        <button id="actionBtn" class="btn btn-primary btn-action" style="display:none;" onclick="manejarAccion()">
+          ➕ Agregar Auto
+        </button>
+      </div>
+
+      <!-- Contenedor de dos columnas: Historial + Autos -->
+      <div class="content-wrapper">
+        <!-- Sidebar Izquierdo - Historial de Ventas Con Buscador -->
+        <aside id="salesHistorySection" class="sidebar-sales" style="display:none;">
+          <div class="card sales-card">
+            <h3>📋 Historial de Ventas</h3>
+            <div class="sales-search-container" style="margin-top: 12px; margin-bottom: 12px;">
+              <input type="text" id="salesSearchInput" placeholder="🔍 Buscar venta por auto o cliente..." onkeyup="buscarVenta()" style="width: 100%; padding: 8px 12px; font-size: 13px;">
+            </div>
+            <div class="sales-list">
+              <ul id="ventasList"></ul>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Tarjetas de autos -->
+        <div id="carCards" class="cards-container"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal de Agregar Auto -->
+  <div id="carFormModal" class="modal">
+    <div class="modal-content modal-lg">
+      <button class="modal-close" onclick="cerrarFormulario()">✕</button>
+      <h2>➕ Agregar Nuevo Vehículo</h2>
+      <p class="modal-subtitle">Completa los datos del vehículo</p>
+      <form id="carForm">
+        <div class="form-grid">
+          <input type="text" id="marca" placeholder="Marca" required>
+          <input type="text" id="modelo" placeholder="Modelo" required>
+          <input type="number" id="anio" placeholder="Año" required>
+          <input type="number" id="precio" placeholder="Precio ($)" required>
+        </div>
+        <input type="text" id="imagen" placeholder="URL de la imagen" required class="full-width">
+        <select id="categoria" required class="full-width" onchange="mostrarCampoDescuento()">
+          <option value="">Seleccionar categoría</option>
+          <option value="nuevos">✨ Nuevos</option>
+          <option value="semi">🔄 Semi nuevos</option>
+          <option value="descuento">💰 En descuentos</option>
+          <option value="subasta">🔨 Subasta</option>
+        </select>
+        <div id="descuentoContainer" style="display:none;">
+          <input type="number" id="descuento" placeholder="Porcentaje de descuento (%)" min="0" max="100" class="full-width">
+        </div>
+        <textarea id="descripcion" placeholder="Descripción del vehículo" required class="full-width"></textarea>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">✓ Guardar Vehículo</button>
+          <button type="button" class="btn btn-secondary" onclick="cerrarFormulario()">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal de Registrar Venta -->
+  <div id="salesFormModal" class="modal">
+    <div class="modal-content modal-lg">
+      <button class="modal-close" onclick="cerrarFormularioVentas()">✕</button>
+      <h2>📊 Registrar Nueva Venta</h2>
+      <p class="modal-subtitle">Completa los datos de la venta</p>
+      <form id="salesForm">
+        <div class="form-grid">
+          <input type="text" id="ventaAuto" placeholder="Modelo vendido" required>
+          <input type="text" id="clienteVenta" placeholder="Nombre del cliente" required>
+          <input type="email" id="clienteEmail" placeholder="Email del cliente" required>
+          <input type="tel" id="clienteTelefono" placeholder="Teléfono del cliente" required>
+        </div>
+        <select id="metodoPago" class="full-width" required>
+          <option value="">Seleccionar método de pago</option>
+          <option value="efectivo">💵 Efectivo</option>
+          <option value="tarjeta">💳 Tarjeta de Crédito</option>
+          <option value="transferencia">🏦 Transferencia Bancaria</option>
+          <option value="financiamiento">📈 Financiamiento</option>
+        </select>
+        <textarea id="notasVenta" placeholder="Notas adicionales (opcional)" class="full-width"></textarea>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">✓ Registrar Venta</button>
+          <button type="button" class="btn btn-secondary" onclick="cerrarFormularioVentas()">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+   <!-- Footer Moderno Compacto -->
+  <footer class="main-footer">
+    <div class="footer-container">
+      <div class="footer-section">
+        <h4>AutoMarket Nicaragua</h4>
+        <p>El marketplace de vehículos definitivo. Encuentra autos nuevos, seminuevos, ofertas líquidas y subastas exclusivas en un solo lugar.</p>
+      </div>
+      <div class="footer-section">
+        <h4>Enlaces Útiles</h4>
+        <ul class="footer-links">
+          <li><a href="#" onclick="mostrarTodos()">Ver Catálogo</a></li>
+          <li><a href="#" onclick="mostrarLogin()">Portal Administrativo</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h4>Soporte y Contacto</h4>
+        <p>📍 Managua, Nicaragua</p>
+        <p>📧 soporte@automarket.com.ni</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 AutoMarket Nicaragua. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+  <script src="/script.js"></script>
+</body>
+</html>
